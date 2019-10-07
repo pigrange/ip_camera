@@ -1,6 +1,5 @@
 import cv2
-from src import pic_encrypt
-from src import player
+from ip_camera import pic_encrypt, player
 import sys
 
 DEFAULT_DISPLAY_COUNT = 6
@@ -59,6 +58,7 @@ def encrypt_face(img, rect):
     pic_encrypt.encrypt(pic)
     pass
 
+
 # 判断人脸是否重叠
 def is_overlap(rect1, rect2):
     l1, t1, w1, h1 = rect1
@@ -86,7 +86,7 @@ def is_overlap(rect1, rect2):
 def main(widow):
     face_cascade = cv2.CascadeClassifier('Cascades/haarcascade_frontalface_alt2.xml')
     profile_cascade = cv2.CascadeClassifier('Cascades/haarcascade_profileface.xml')
-    cam_url = 'http://admin:admin@113.54.193.134:8081/'
+    cam_url = 'http://admin:admin@10.252.252.13:8081/'
     cap = cv2.VideoCapture(cam_url)
     print(cap.isOpened())
 
@@ -134,7 +134,7 @@ def main(widow):
     cv2.destroyAllWindows()
 
 
-if __name__ == '__main__':
+def start():
     app, win = player.initPlayer()
     main(win)
     sys.exit(app.exec_())

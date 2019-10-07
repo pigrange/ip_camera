@@ -5,7 +5,7 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import QImage
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from src.view import Ui_MainWindow
+from ip_camera.view import Ui_MainWindow
 
 
 class MyWindow(QMainWindow, Ui_MainWindow):
