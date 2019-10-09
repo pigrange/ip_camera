@@ -9,7 +9,7 @@ import camera.util.pic_mosaic as mosaic
 
 
 class FrameProcessor(QThread):
-    DEFAULT_DISPLAY_COUNT = 6
+    DEFAULT_DISPLAY_COUNT = 18
 
     # 同步锁
     lock = Lock()
@@ -30,18 +30,19 @@ class FrameProcessor(QThread):
     def set_cap(self, cap):
         self.cap = cap
 
-    def __int__(self):
-        super(FrameProcessor, self).__init__()
+    def __init__(self, parent=None, size=None):
+        super(FrameProcessor, self).__init__(parent)
         self.detector = FaceDetector()
         self.mosaic = mosaic
+        self.size = size
 
     # 转化图像格式
     def compress_img(self, img):
-        d_w = self.player.get_display_width()
-        d_h = self.player.get_display_height()
 
-        raw = cv2.resize(img, (d_w, d_h))
-        raw = cv2.cvtColor(raw, self.rgb)
+        if self.size is not None:
+            img = cv2.resize(img, self.size)
+
+        raw = cv2.cvtColor(img, self.rgb)
 
         h, w, byte_per_line = raw.shape
 
@@ -50,39 +51,40 @@ class FrameProcessor(QThread):
 
     # 轮询
     def poll_frame(self):
-        res, raw = self.cap.read()
-        img = self.rotate_img(raw, 90)
 
-        if not res:
-            return
+        while True:
+            res, raw = self.cap.read()
+            img = self.rotate_img(raw, 90)
 
-        raw_faces = self.detector.detect_faces(img)
-        faces = self.check_detected_faces(raw_faces)
+            if not res:
+                return
 
-        for face_rect in faces:
-            x, y, w, h = face_rect
-            self.mosaic.encrypt_face(img, (2 * x, 2 * y, 2 * h, 2 * w))
+            raw_faces = self.detector.detect_faces(img)
+            faces = self.fill_missed_face(raw_faces)
 
-        display = self.compress_img(img)
+            for face_rect in faces:
+                x, y, w, h = face_rect
+                self.mosaic.encrypt_face(img, (2 * x, 2 * y, 2 * h, 2 * w))
 
-        # 回调主线程显示
-        self._signal.emit(display)
+            display = self.compress_img(img)
 
-        # 加锁判断线程是否结束
-        self.lock.acquire()
-        if self.finish:
+            # 回调主线程显示
+            self.signal.emit(display)
+
+            # 加锁判断线程是否结束
+            self.lock.acquire()
+            if self.finish:
+                self.lock.release()
+                return
+
+            # 立即释放锁
             self.lock.release()
-            return
 
-        # 立即释放锁
-        self.lock.release()
+        # # 使用timer重启
+        # t = Timer(0.016, self.poll_frame)
+        # t.start()
 
-        # 使用timer重启
-        t = Timer(0.016, self.poll_frame)
-        t.start()
-
-    # 去重
-    def check_detected_faces(self, faces):
+    def fill_missed_face(self, faces):
         if len(faces) != 0:
             self.display_count = self.DEFAULT_DISPLAY_COUNT
             self.display_faces = faces
@@ -108,7 +110,7 @@ class FrameProcessor(QThread):
         return rotated
 
     def run(self):
-        super().run()
+        # super().run()
 
         if self.cap is None:
             return

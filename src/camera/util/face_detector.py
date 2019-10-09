@@ -5,7 +5,9 @@ PROFILE_FACE_PATH = 'Cascades/haarcascade_profileface.xml'
 
 
 class FaceDetector:
+    detect_count = 0
     __cascades = []
+    __last_detect_faces = []
 
     # 初始化
     def __init__(self):
@@ -63,6 +65,12 @@ class FaceDetector:
 
     # 获取人脸坐标
     def detect_faces(self, raw_img):
+        self.detect_count = (self.detect_count + 1) % 4
+        count = self.detect_count
+
+        if count != 0:
+            return self.__last_detect_faces
+
         gray = cv2.cvtColor(raw_img, cv2.COLOR_BGR2GRAY)
         frame = cv2.resize(gray, (0, 0), fx=0.5, fy=0.5)
 
@@ -73,4 +81,5 @@ class FaceDetector:
         faces_2 = cascades[1].detectMultiScale(frame, scaleFactor=1.2, minNeighbors=3, minSize=(16, 16))
 
         faces = self.__merge_faces(faces_1, faces_2)
+        self.__last_detect_faces = faces
         return faces

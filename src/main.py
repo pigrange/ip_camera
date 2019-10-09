@@ -14,13 +14,15 @@ class IPCamera:
     def __init__(self):
         self.cap = cv2.VideoCapture()
         self.player = MediaPlayer(callback=self)
-        self.producer = FrameProcessor()
+        size = self.player.get_expect_size()
+        self.producer = FrameProcessor(size=size)
         self.producer.signal.connect(self.display_frame)
 
     def connect_camera(self, url):
-        cam_url = BASE_URL + url
-        test_url = 'http://admin:admin@113.54.206.185:8081'
-        res = self.cap.open(test_url)
+        print(url)
+        cam_url = 0 if url == '0' else BASE_URL + url
+        # test_url = 'http://admin:admin@113.54.207.47:8081'
+        res = self.cap.open(cam_url)
 
         # 成功打开
         if res:

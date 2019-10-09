@@ -14,11 +14,10 @@ class MediaPlayer(QMainWindow, Ui_MainWindow):
         self.connect_btn.clicked.connect(self.on_connect_click)
         self.cancel_btn.clicked.connect(self.on_cancel_click)
 
-    def get_display_width(self):
-        return self.label.width()
-
-    def get_display_height(self):
-        return self.label.height()
+    def get_expect_size(self):
+        w = self.label.width()
+        h = self.label.height()
+        return w, h
 
     def set_frame(self, raw):
         pix_map = QtGui.QPixmap.fromImage(raw)
@@ -38,4 +37,3 @@ class MediaPlayer(QMainWindow, Ui_MainWindow):
     def closeEvent(self, a0: QtGui.QCloseEvent):
         super().closeEvent(a0)
         self.exit_flag = True
-
