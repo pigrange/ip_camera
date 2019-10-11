@@ -1,13 +1,7 @@
 import cv2
-from ip_camera import pic_encrypt, player
-import sys
+from camera.util import pic_mosaic
 
 DEFAULT_DISPLAY_COUNT = 6
-
-
-# 测试用，画绿色方块
-def draw_rect(img, pt1, pt2, color):
-    cv2.rectangle(img, pt1, pt2, color, thickness=-1)
 
 
 # 旋转视频
@@ -55,11 +49,12 @@ def merge_faces(front_faces, profile_faces):
 def encrypt_face(img, rect):
     x, y, w, h = rect
     pic = img[y:y + h, x: x + w]
-    pic_encrypt.encrypt(pic)
+    pic_mosaic.encrypt_face(pic, rect)
     pass
 
+    # 判断人脸是否重叠
 
-# 判断人脸是否重叠
+
 def is_overlap(rect1, rect2):
     l1, t1, w1, h1 = rect1
     l2, t2, w2, h2 = rect2
@@ -124,7 +119,7 @@ def main(widow):
 
         count = (count + 1) % 3
 
-        flag = widow.setImg(img)
+        flag = widow.set_frame(img)
         if flag:
             break
 
@@ -133,8 +128,8 @@ def main(widow):
     cap.release()
     cv2.destroyAllWindows()
 
-
-def start():
-    app, win = player.initPlayer()
-    main(win)
-    sys.exit(app.exec_())
+#
+# def start():
+#     app, win = player.initPlayer()
+#     main(win)
+#     sys.exit(app.exec_())
