@@ -1,2 +1,2 @@
-opencv_python==4.1.1.26
+opencv_python==4.2.0.32
 PyQt5==5.13.1
